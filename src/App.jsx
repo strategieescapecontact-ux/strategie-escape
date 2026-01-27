@@ -108,12 +108,26 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
         >
           {items.map((item, index) => (
             <div key={index} className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
-              <div className="text-center p-4 z-10">
-                 <p className="text-slate-500 text-sm mb-2 font-mono tracking-widest uppercase">Preuve #{index + 1}</p>
-                 <p className="text-white font-mono text-xs bg-slate-800 px-3 py-1 rounded-full border border-white/10 break-all">{item.filename}</p>
+              
+              {/* IMAGE SEULE (Texte de debug supprimé) */}
+              <img 
+                src={`/${item.filename}`} 
+                alt={item.title} 
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none'; 
+                  e.target.nextSibling.style.display = 'flex';
+                }} 
+              />
+              
+              {/* Message d'erreur discret si image HS */}
+              <div className="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
+                 <AlertTriangle className="text-red-400 mb-2" />
+                 <p className="text-white text-xs font-bold">Image manquante</p>
+                 <p className="text-slate-500 text-[9px] mt-2">({item.filename})</p>
               </div>
               
-              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20">
+              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
                 <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
                 <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
               </div>
@@ -145,7 +159,7 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
 };
 
 // LIEN TELEGRAM A REMPLACER
-const TELEGRAM_LINK = "https://t.me/escapestrategie"; 
+const TELEGRAM_LINK = "https://t.me/VOTRE_LIEN_TELEGRAM"; 
 
 const TelegramButton = () => {
   return (
@@ -166,7 +180,6 @@ const TelegramButton = () => {
   );
 };
 
-// NOUVEAU COMPOSANT TEMOIGNAGES AVEC PREUVE FIRM
 const TestimonialsSection = () => {
   const reviews = [
     { name: "Thomas L.", firm: "Validé chez FTMO", text: "Franchement top. J'étais sceptique au début avec le 0€, mais le compte 50k a été validé en 15 jours. Le partage est fair vu que j'ai rien payé.", stars: 5 },
@@ -189,7 +202,6 @@ const TestimonialsSection = () => {
           </div>
         </FadeIn>
 
-        {/* Scrollable Container */}
         <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
           {reviews.map((review, i) => (
             <div key={i} className="min-w-[300px] md:min-w-[350px] bg-[#1e293b]/40 border border-white/5 p-6 rounded-2xl snap-center backdrop-blur-sm flex flex-col justify-between hover:border-white/10 transition-colors">
@@ -280,16 +292,17 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
+  // --- NOMS DE FICHIERS SIMPLIFIÉS ---
   const validationImages = [
-    { filename: "IMG-20260122-WA0000.jpg", title: "Validation FTMO", subtitle: "Phase 1 & 2 complétées" },
-    { filename: "IMG-20260122-WA0002.jpg", title: "Validation WEFUND", subtitle: "Respect strict du drawdown" },
-    { filename: "IMG-20260122-WA0010.jpg", title: "Validation P2T", subtitle: "Performance pure" }, 
+    { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
+    { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
+    { filename: "val03.jpg", title: "Validation 200k", subtitle: "Performance pure" }, 
   ];
 
   const payoutImages = [
-    { filename: "IMG-20260122-WA0003.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
-    { filename: "IMG-20260122-WA0004.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
-    { filename: "IMG-20260122-WA0005.jpg", title: "Premier Payout", subtitle: "Gains mois 1" }, 
+    { filename: "pay01.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
+    { filename: "pay02.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
+    { filename: "pay03.jpg", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
   ];
 
   const faqs = [
@@ -455,7 +468,10 @@ const App = () => {
                <Trophy className="text-yellow-400 w-8 h-8 flex-shrink-0" />
                <h3 className="text-2xl md:text-3xl font-bold text-white">Validations Récentes</h3>
             </div>
+            
+            {/* Carousel images with fallback */}
             <ImageCarousel items={validationImages} titleColor="text-emerald-400" />
+            
             <div className="text-center mt-8 sm:mt-12">
               <p className="text-slate-500 text-xs sm:text-sm">Swipez pour voir plus de résultats</p>
             </div>
@@ -521,18 +537,23 @@ const App = () => {
               <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Choisissez votre capital</h2>
               <p className="text-slate-400 text-sm sm:text-base">Peu importe la taille du compte, le prix de notre service reste le même : <span className="text-blue-400 font-bold">0€</span>.</p>
               
-              {/* MyFxBook Block with Image Placeholder */}
+              {/* MyFxBook Block */}
               <div className="mt-8 flex flex-col items-center justify-center gap-4">
                 <a 
-                  href="#" 
+                  href="https://www.myfxbook.com/members/ATCSoftware/hrc-algo/11801141" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-[#1e293b] hover:bg-[#253248] border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-3 transition-all group max-w-sm w-full"
                 >
-                   {/* Placeholder for MyFxBook Screenshot */}
+                   {/* Placeholder for MyFxBook Screenshot with real IMG tag */}
                    <div className="w-full h-32 bg-slate-800 rounded-lg flex items-center justify-center border border-white/5 relative overflow-hidden">
-                      <img src="/api/placeholder/400/200" alt="Courbe MyFxBook" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-75 transition-opacity" />
-                      <span className="relative z-10 text-xs text-slate-400 font-mono">Capture MyFxBook Ici</span>
+                      <img 
+                        src="/myfxbook.jpg" 
+                        alt="Courbe MyFxBook" 
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" 
+                        onError={(e) => {e.target.style.display='none'; e.target.nextSibling.style.display='block'}}
+                      />
+                      <span className="relative z-10 text-xs text-slate-400 font-mono">Voir la courbe</span>
                    </div>
                    
                    <div className="flex items-center gap-3 w-full justify-center">
@@ -563,7 +584,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 60% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(40% performance)</span></li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 40%</strong> sur les profits</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès Algo Gestion</li>
                   <li className="flex gap-3 text-slate-300"><Clock size={20} className="text-blue-500 flex-shrink-0"/> Accès : liste d'attente</li>
                 </ul>
@@ -587,7 +608,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>Partage : 80% pour vous</strong> <br/><span className="text-xs text-blue-300/70 ml-8">(20% performance)</span></li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>FRAIS 20%</strong> sur les profits</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Algo Gestion Expert</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Support prioritaire</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Accès immédiat</li>
@@ -608,7 +629,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 70% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(30% performance)</span></li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 30%</strong> sur les profits</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Algo Gestion Avancé</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Support Prioritaire</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès prioritaire</li>
@@ -677,7 +698,6 @@ const App = () => {
                 Je valide mon Challenge <ArrowRight size={24} className="sm:w-7 sm:h-7"/>
               </a>
             </div>
-            <p className="mt-6 text-red-400 font-bold text-xs sm:text-sm animate-pulse">🚨 3 places restantes pour Janvier.</p>
           </FadeIn>
         </div>
       </section>
@@ -687,7 +707,7 @@ const App = () => {
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
           <div>
             <span className="text-xl font-bold text-white tracking-tighter uppercase">STRATÉGIE <span className="text-blue-500">ESCAPE</span></span>
-            <p className="mt-2 text-xs sm:text-sm">Trading algorithmique au service de la performance.</p>
+            <p className="mt-2 text-xs sm:text-sm">Trading algorithmique à la performance.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm">
             <button onClick={() => openModal('cgv')} className="hover:text-blue-400 transition-colors">CGV</button>

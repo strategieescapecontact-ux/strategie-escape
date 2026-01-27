@@ -109,7 +109,7 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
           {items.map((item, index) => (
             <div key={index} className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
               
-              {/* IMAGE SEULE (Texte de debug supprimé) */}
+              {/* IMAGE SEULE AVEC GESTION D'ERREUR */}
               <img 
                 src={`/${item.filename}`} 
                 alt={item.title} 
@@ -124,7 +124,8 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
               <div className="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
                  <AlertTriangle className="text-red-400 mb-2" />
                  <p className="text-white text-xs font-bold">Image manquante</p>
-                 <p className="text-slate-500 text-[9px] mt-2">({item.filename})</p>
+                 <p className="text-slate-400 text-[10px] break-all mt-1">({item.filename})</p>
+                 <p className="text-slate-500 text-[9px] mt-2">Dossier public/</p>
               </div>
               
               <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
@@ -292,7 +293,7 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
-  // --- NOMS DE FICHIERS SIMPLIFIÉS ---
+  // --- NOMS DE FICHIERS SIMPLIFIÉS 01/02/03 ---
   const validationImages = [
     { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
     { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
@@ -397,6 +398,15 @@ const App = () => {
               </a>
             </div>
           </FadeIn>
+          
+          <div className="mt-12 sm:mt-16 border-t border-white/5 pt-8">
+            <p className="text-xs sm:text-sm text-slate-400 mb-4 font-semibold tracking-widest uppercase">Nos algorithmes fonctionnent sur</p>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 opacity-70">
+              {["FTMO", "Nova Funding", "Kortana", "Next Step", "Infinity"].map((firm) => (
+                <span key={firm} className="text-lg sm:text-xl font-bold tracking-tight whitespace-nowrap text-slate-400 hover:text-white transition-colors cursor-default">{firm}</span>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -584,7 +594,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 40%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 60% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(40% performance)</span></li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès Algo Gestion</li>
                   <li className="flex gap-3 text-slate-300"><Clock size={20} className="text-blue-500 flex-shrink-0"/> Accès : liste d'attente</li>
                 </ul>
@@ -608,7 +618,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>FRAIS 20%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>Partage : 80% pour vous</strong> <br/><span className="text-xs text-blue-300/70 ml-8">(20% performance)</span></li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Algo Gestion Expert</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Support prioritaire</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Accès immédiat</li>
@@ -629,7 +639,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 30%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 70% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(30% performance)</span></li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Algo Gestion Avancé</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Support Prioritaire</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès prioritaire</li>

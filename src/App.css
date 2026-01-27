@@ -1,42 +1,742 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+import React, { useState, useEffect, useRef } from 'react';
+import { CheckCircle, AlertTriangle, ChevronDown, ChevronUp, ArrowRight, TrendingUp, Trophy, DollarSign, ChevronLeft, ChevronRight, ExternalLink, Clock, X, Send, Mail, ShieldCheck, Flame, Star, Quote, BarChart, Users } from 'lucide-react';
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+// --- COMPOSANTS GRAPHIQUES ---
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+const GridPattern = () => (
+  <div 
+    className="absolute inset-0 pointer-events-none opacity-10"
+    style={{
+      backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+      backgroundSize: '40px 40px'
+    }}
+  ></div>
+);
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
+const TradingCurve = () => (
+  <svg className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 1440 600" preserveAspectRatio="none">
+    <path 
+      d="M0 400C320 400 480 350 640 300C800 250 960 200 1120 150C1280 100 1360 50 1440 0V600H0Z" 
+      fill="#1e40af" 
+      fillOpacity="0.2"
+    />
+    <path 
+      d="M0 400C320 400 480 350 640 300C800 250 960 200 1120 150C1280 100 1360 50 1440 0" 
+      stroke="#3b82f6" 
+      strokeWidth="3" 
+      fill="none"
+    />
+  </svg>
+);
 
-.card {
-  padding: 2em;
-}
+const AbstractCandles = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
+    <div className="absolute top-[20%] right-[10%] w-2 h-16 bg-emerald-500 rounded-sm"></div>
+    <div className="absolute top-[40%] right-[15%] w-2 h-24 bg-emerald-500 rounded-sm"></div>
+    <div className="absolute bottom-[20%] left-[5%] w-2 h-32 bg-blue-500 rounded-sm"></div>
+  </div>
+);
 
-.read-the-docs {
-  color: #888;
-}
+// --- COMPOSANTS FONCTIONNELS ---
+
+const FadeIn = ({ children, delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => setIsVisible(entry.isIntersecting));
+    });
+    const currentRef = domRef.current;
+    if (currentRef) observer.observe(currentRef);
+    return () => {
+      if (currentRef) observer.unobserve(currentRef);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={domRef}
+      className={`transition-all duration-1000 ease-out transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
+
+const Modal = ({ isOpen, onClose, title, content }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-[#1e293b] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+          <X size={24} />
+        </button>
+        <div className="p-8">
+          <h3 className="text-2xl font-bold text-white mb-6">{title}</h3>
+          <div className="text-slate-300 space-y-4 text-sm leading-relaxed whitespace-pre-wrap">
+            {content}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// COMPOSANT CARROUSEL CORRIGÉ AVEC GESTION DES IMAGES
+const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (!items || items.length === 0) return <div className="p-4 text-center text-slate-500">Chargement...</div>;
+
+  const prev = () => {
+    setCurrentIndex((curr) => (curr === 0 ? items.length - 1 : curr - 1));
+  };
+
+  const next = () => {
+    setCurrentIndex((curr) => (curr === items.length - 1 ? 0 : curr + 1));
+  };
+
+  return (
+    <div className="relative group max-w-sm mx-auto px-4 sm:px-0">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#1e293b] relative aspect-[4/5] shadow-2xl">
+        <div 
+          className="flex transition-transform duration-500 ease-out h-full" 
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {items.map((item, index) => (
+            <div key={index} className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
+              
+              {/* --- IMAGE CORRIGÉE : VRAIE BALISE IMG --- */}
+              {/* Le src commence par / pour chercher dans le dossier public */}
+              <img 
+                src={`/${item.filename}`} 
+                alt={item.title} 
+                className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+                onError={(e) => {
+                  // Si l'image ne charge pas, on cache l'img et on affiche le message d'erreur
+                  e.target.style.display = 'none'; 
+                  e.target.nextSibling.style.display = 'flex';
+                }} 
+              />
+              
+              {/* --- MESSAGE DE SECOURS (Si image introuvable) --- */}
+              <div className="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
+                 <AlertTriangle className="text-red-400 mb-2" />
+                 <p className="text-white text-xs font-bold">Image introuvable</p>
+                 <p className="text-slate-400 text-[10px] break-all mt-1">Vérifiez le nom : {item.filename}</p>
+                 <p className="text-slate-500 text-[9px] mt-2">Dossier public/</p>
+              </div>
+              
+              {/* Overlay Texte */}
+              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
+                <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
+                <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={prev} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-sm transition-all shadow-lg z-30">
+        <ChevronLeft size={20} />
+      </button>
+      <button onClick={next} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-blue-600 text-white p-2 rounded-full backdrop-blur-sm transition-all shadow-lg z-30">
+        <ChevronRight size={20} />
+      </button>
+
+      <div className="absolute -bottom-8 left-0 right-0 flex justify-center gap-2">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentIndex(i)}
+            className={`h-2 rounded-full transition-all ${
+              currentIndex === i ? "bg-blue-500 w-8" : "bg-slate-600 w-2"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// LIEN TELEGRAM A REMPLACER
+const TELEGRAM_LINK = "https://t.me/VOTRE_LIEN_TELEGRAM"; 
+
+const TelegramButton = () => {
+  return (
+    <a
+      href={TELEGRAM_LINK}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="fixed bottom-6 right-6 z-50 group flex items-center justify-center animate-bounce"
+      aria-label="Rejoindre Telegram"
+    >
+      <span className="absolute right-full mr-4 bg-white text-[#229ED9] px-3 py-1.5 rounded-lg text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg hidden sm:block">
+        Rejoindre le Canal VIP
+      </span>
+      <div className="bg-[#229ED9] hover:bg-[#1b8ac0] text-white p-4 rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95">
+        <Send className="w-6 h-6 ml-0.5 mt-0.5" />
+      </div>
+    </a>
+  );
+};
+
+const TestimonialsSection = () => {
+  const reviews = [
+    { name: "Thomas L.", firm: "Validé chez FTMO", text: "Franchement top. J'étais sceptique au début avec le 0€, mais le compte 50k a été validé en 15 jours. Le partage est fair vu que j'ai rien payé.", stars: 5 },
+    { name: "Karim B.", firm: "Validé chez Nova", text: "Validé du premier coup. L'équipe est réactive sur Telegram. J'attends mon premier payout là, hate de voir la suite.", stars: 5 },
+    { name: "Aurélien D.", firm: "Validé chez Kortana", text: "J'ai déjà cramé 3 challenges avant eux. Là c'est passé crème. Merci pour le suivi, ça change des vendeurs de rêve.", stars: 4 },
+    { name: "Marc P.", firm: "Validé chez FTMO", text: "Bonne expérience. Le robot est safe, pas de frayeur sur le drawdown. C'est exactement ce que je cherchais pour diversifier.", stars: 5 },
+    { name: "Sophie M.", firm: "Validé chez NextStep", text: "Un peu long pour avoir une réponse le week-end mais le résultat est là : compte 100k financé. C'est le principal au final.", stars: 4 },
+    { name: "David R.", firm: "Validé chez Infinity", text: "J'ai pris le pack expert. L'accès immédiat c'est pas du blabla. L'algo tourne bien pour l'instant, c'est propre.", stars: 5 },
+    { name: "Lucas V.", firm: "Validé chez FTMO", text: "Simple et efficace. Pas de prise de tête avec les graphiques. Je laisse tourner et je récupère ma part.", stars: 5 },
+    { name: "Julien S.", firm: "Validé chez Nova", text: "Service carré. Rien à dire. Validé en 3 semaines environ.", stars: 5 }
+  ];
+
+  return (
+    <section className="py-20 bg-[#0f172a] relative border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-6">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">La parole aux membres</h2>
+            <p className="text-slate-400">Transparence totale. Voici ce que disent ceux qui ont franchi le pas.</p>
+          </div>
+        </FadeIn>
+
+        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
+          {reviews.map((review, i) => (
+            <div key={i} className="min-w-[300px] md:min-w-[350px] bg-[#1e293b]/40 border border-white/5 p-6 rounded-2xl snap-center backdrop-blur-sm flex flex-col justify-between hover:border-white/10 transition-colors">
+              <div>
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(5)].map((_, index) => (
+                    <Star 
+                      key={index} 
+                      size={16} 
+                      className={`${index < review.stars ? "fill-yellow-400 text-yellow-400" : "fill-slate-700 text-slate-700"}`} 
+                    />
+                  ))}
+                </div>
+                <div className="mb-4">
+                  <Quote className="text-blue-500/30 w-8 h-8 mb-2 rotate-180" />
+                  <p className="text-slate-300 text-sm leading-relaxed italic">"{review.text}"</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 border-t border-white/5 pt-4 mt-2">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                  {review.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-white text-sm font-bold">{review.name}</p>
+                  <p className="text-emerald-400 text-xs flex items-center gap-1 font-semibold">
+                    <CheckCircle size={10} className="fill-emerald-400/20"/> {review.firm}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const App = () => {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: "", text: "" });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const openModal = (type) => {
+    if (type === 'cgv') {
+      setModalContent({
+        title: "Conditions Générales",
+        text: "En rejoignant notre programme, vous acceptez que le trading comporte des risques...\n\nLe service est facturé uniquement à la performance (Success Fee) sur les comptes financés."
+      });
+    } else if (type === 'legal') {
+      setModalContent({
+        title: "Mentions Légales",
+        text: "Contact : strategie.escape.contact@gmail.com\n\nPropriété Intellectuelle : Tout le contenu de ce site est la propriété exclusive de Stratégie Escape."
+      });
+    }
+    setModalOpen(true);
+  };
+
+  const steps = [
+    { num: "01", title: "Votre Challenge", text: "Nous vous guidons sur la meilleure solution en fonction de votre profil et de vos objectifs." },
+    { num: "02", title: "Validation Gratuite", text: "Nous connectons nos algos. Nous validons les Phases 1 & 2 pour vous, sans aucun frais de service." },
+    { num: "03", title: "Profits & Partage", text: "Une fois le challenge validé, nous mettons un ou plusieurs robot EA à disposition. Lors de votre retrait (payout), vous nous reversez votre part de performance." }
+  ];
+
+  const eaFeatures = [
+    "Compatibles Propfirm (FTMO, Nova...)",
+    "Pas de Grid et Martingale",
+    "TP/SL pour chaque trade",
+    "Protection Equity (Capital)",
+    "Filtre News Économiques"
+  ];
+
+  // --- CONFIGURATION DES IMAGES ---
+  // Assurez-vous que ces noms correspondent EXACTEMENT à vos fichiers dans le dossier public/
+  const validationImages = [
+    { filename: "IMG-20260122-WA0000.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
+    { filename: "IMG-20260122-WA0002.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
+    { filename: "IMG-20260122-WA0000.jpg", title: "Validation 200k", subtitle: "Performance pure" }, 
+  ];
+
+  const payoutImages = [
+    { filename: "IMG-20260122-WA0003.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
+    { filename: "IMG-20260122-WA0004.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
+    { filename: "IMG-20260122-WA0003.jpg", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
+  ];
+
+  const faqs = [
+    {
+      q: "Vraiment gratuit ? Où est le piège ?",
+      a: "Il n'y a pas de piège. C'est un partenariat mathématique. Nous avons tellement confiance en nos algorithmes que nous investissons notre temps. Si vous ne gagnez pas d'argent, nous non plus. Nous partageons le risque."
+    },
+    {
+      q: "Comment se passe le paiement du partage ?",
+      a: "C'est basé sur la confiance. Lorsque vous recevez votre virement de la Prop Firm (Payout), vous nous virez notre part. En cas de non-paiement, l'accès aux outils est coupé."
+    },
+    {
+      q: "Est-ce que l'algo est risqué ?",
+      a: "La préservation du capital est notre priorité. Nos algos intègrent des 'Hard Stops' et des filtres de news pour protéger votre compte contre les crashs de marché."
+    },
+    {
+      q: "Puis-je utiliser l'algo moi-même ?",
+      a: "OUI, l'algo vous sera mis a disposition avec tutoriels et support. C'est un outil professionnel calibré pour votre réussite."
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden relative">
+      
+      <GridPattern />
+      <TelegramButton />
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={modalContent.title} content={modalContent.text} />
+
+      {/* NAV */}
+      <nav className={`fixed w-full z-40 transition-all duration-300 border-b ${scrolled ? 'bg-[#0f172a]/95 backdrop-blur-md border-white/10 shadow-lg py-0' : 'bg-transparent border-transparent py-2'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+          <div className="text-xl sm:text-2xl font-bold tracking-tighter text-white uppercase flex-shrink-0 z-50">
+            STRATÉGIE <span className="text-blue-500">ESCAPE</span>
+          </div>
+          
+          <a href={TELEGRAM_LINK} target="_blank" className="bg-[#229ED9] hover:bg-[#1b8ac0] text-white font-bold py-2 px-4 text-sm sm:px-6 sm:text-base rounded-full transition-all transform active:scale-95 shadow-[0_0_15px_rgba(34,158,217,0.3)] z-50 flex items-center gap-2">
+            <Send size={16} /> Canal Telegram
+          </a>
+        </div>
+      </nav>
+
+      {/* HERO SECTION */}
+      <header className="relative pt-32 pb-16 lg:pt-48 lg:pb-32 px-4 sm:px-6 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-blue-600/10 rounded-full blur-[80px] sm:blur-[120px] -z-10 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-indigo-900/10 rounded-full blur-[80px] sm:blur-[120px] -z-10"></div>
+        <TradingCurve />
+        
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <FadeIn>
+            <div className="flex flex-col items-center gap-4 mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-red-900/30 border border-red-500/30 text-red-300 text-xs sm:text-sm font-medium backdrop-blur-sm animate-pulse">
+                <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-red-500"></span>
+                </span>
+                ALERTE : SESSION BIENTÔT COMPLÈTE (3 PLACES)
+              </div>
+              <div className="text-slate-400 text-xs font-mono bg-white/5 px-3 py-1 rounded border border-white/5 flex items-center gap-2">
+                <Users size={12} className="text-blue-400"/> +1.2M$ de capitaux gérés
+              </div>
+            </div>
+          </FadeIn>
+          
+          <FadeIn delay={200}>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 sm:mb-8 leading-[1.1]">
+              Nous validons votre Challenge <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-blue-400">GRATUITEMENT</span>
+            </h1>
+          </FadeIn>
+          
+          <FadeIn delay={400}>
+            <p className="text-lg sm:text-xl text-slate-300 mb-2 max-w-3xl mx-auto leading-relaxed font-light px-2">
+              Arrêtez de payer des services qui ne garantissent rien. Avec <span className="font-semibold text-white">Stratégie Escape</span>, nous passons votre évaluation prop firm gratuitement. Nous nous rémunérons uniquement sur vos futurs profits.
+            </p>
+            <p className="text-orange-400 text-sm font-semibold mb-8 animate-pulse">⚠️ Les inscriptions ferment ce Dimanche à minuit.</p>
+          </FadeIn>
+
+          {/* REASON WHY BLOCK */}
+          <FadeIn delay={500}>
+            <div className="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4 max-w-2xl mx-auto mb-8 flex items-start gap-3 text-left">
+               <ShieldCheck className="text-emerald-400 w-6 h-6 flex-shrink-0 mt-1"/>
+               <p className="text-emerald-100/80 text-sm italic">
+                 "Pourquoi est-ce gratuit ? Notre intérêt est mathématique : nous gagnons plus en prenant une commission sur vos profits long terme qu'en vous vendant un service unique. Nous investissons sur VOTRE réussite."
+               </p>
+            </div>
+          </FadeIn>
+          
+          <FadeIn delay={600}>
+            <div className="flex flex-col w-full sm:w-auto px-4 sm:px-0 justify-center">
+              <a href={TELEGRAM_LINK} target="_blank" className="w-full sm:w-auto bg-[#229ED9] hover:bg-[#1b8ac0] text-white text-lg font-bold py-4 px-10 rounded-xl transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 active:scale-95">
+                Rejoindre le Canal Telegram <Send size={20}/>
+              </a>
+            </div>
+          </FadeIn>
+          
+          <div className="mt-12 sm:mt-16 border-t border-white/5 pt-8">
+            <p className="text-xs sm:text-sm text-slate-400 mb-4 font-semibold tracking-widest uppercase">Nos algorithmes fonctionnent sur</p>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 opacity-70">
+              {["FTMO", "Nova Funding", "Kortana", "Next Step", "Infinity"].map((firm) => (
+                <span key={firm} className="text-lg sm:text-xl font-bold tracking-tight whitespace-nowrap text-slate-400 hover:text-white transition-colors cursor-default">{firm}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* VALUE PROPOSITION */}
+      <section className="py-16 sm:py-20 bg-[#0b1120]/50 relative z-10 border-y border-white/5">
+        <AbstractCandles />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+          <FadeIn>
+            <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+              <div className="order-2 md:order-1">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-8 text-white text-center md:text-left">Le modèle "Gagnant-Gagnant"</h2>
+                <div className="space-y-8">
+                  <div className="flex gap-4">
+                    <div className="mt-1 bg-red-500/10 p-2 sm:p-3 rounded-lg h-fit flex-shrink-0">
+                      <AlertTriangle className="text-red-500 w-5 h-5 sm:w-6 sm:h-6"/>
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold text-red-400 mb-2">L'ancien modèle (Risqué)</h3>
+                      <p className="text-slate-400 text-sm sm:text-base">Vous payez des frais de passage (400/800€) ET de gestion. En cas d'échec, votre investissement est perdu à 100%.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 relative">
+                    <div className="absolute left-[22px] sm:left-[26px] top-[-30px] h-[40px] w-[2px] bg-gradient-to-b from-red-500/20 to-blue-500/50"></div>
+                    <div className="mt-1 bg-blue-500/20 p-2 sm:p-3 rounded-lg h-fit shadow-[0_0_15px_rgba(59,130,246,0.2)] flex-shrink-0">
+                      <CheckCircle className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6"/>
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-bold text-blue-400 mb-2">Le modèle Escape (Partage de profits)</h3>
+                      <p className="text-slate-300 text-sm sm:text-base">Vous payez le challenge directement à la propfirms. Nous le passons <strong className="text-white">GRATUITEMENT</strong>. Aucun paiement à sortir de votre poche : nous nous rémunérons uniquement sur le partage des gains générés une fois financé (après réception du Payout).</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="order-1 md:order-2 bg-gradient-to-br from-[#1e293b] to-[#0f172a] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+                 <div className="text-center mb-6 sm:mb-8">
+                   <p className="text-slate-400 uppercase tracking-widest text-xs font-bold mb-2">Répartition des profits</p>
+                   <div className="text-3xl sm:text-5xl font-bold text-white">10 000 $ <br className="sm:hidden"/><span className="text-sm sm:text-lg text-slate-500 font-normal">de gain mensuel (ex)</span></div>
+                 </div>
+                 <div className="flex flex-col gap-4">
+                   <div className="bg-blue-600 rounded-xl p-4 sm:p-6 relative overflow-hidden">
+                     <div className="flex justify-between items-end relative z-10">
+                       <div>
+                         <div className="text-blue-200 font-semibold mb-1 text-sm sm:text-base">Pour VOUS (Client)</div>
+                         <div className="text-2xl sm:text-4xl font-bold text-white">8 000 $</div>
+                       </div>
+                       <div className="text-3xl sm:text-5xl font-black text-white/20">80%</div>
+                     </div>
+                   </div>
+                   <div className="bg-[#1e293b] border border-white/10 rounded-xl p-4 sm:p-6 flex justify-between items-end">
+                      <div>
+                         <div className="text-slate-400 font-semibold mb-1 text-sm sm:text-base">Pour Stratégie Escape</div>
+                         <div className="text-xl sm:text-2xl font-bold text-slate-200">2 000 $</div>
+                       </div>
+                       <div className="text-2xl sm:text-4xl font-black text-slate-700">20%</div>
+                   </div>
+                 </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* VALIDATIONS CAROUSEL */}
+      <section className="py-16 bg-[#0f172a] border-y border-white/5 relative">
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          <FadeIn>
+            <div className="flex flex-col sm:flex-row items-center gap-3 mb-8 justify-center text-center">
+               <Trophy className="text-yellow-400 w-8 h-8 flex-shrink-0" />
+               <h3 className="text-2xl md:text-3xl font-bold text-white">Validations Récentes</h3>
+            </div>
+            
+            {/* Carousel images with fallback */}
+            <ImageCarousel items={validationImages} titleColor="text-emerald-400" />
+            
+            <div className="text-center mt-8 sm:mt-12">
+              <p className="text-slate-500 text-xs sm:text-sm">Swipez pour voir plus de résultats</p>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-[#0f172a] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <FadeIn>
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 sm:mb-6 text-white">Un processus simplifié</h2>
+              <p className="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base">De l'inscription au premier retrait, tout est conçu pour être transparent et automatisé.</p>
+            </div>
+          </FadeIn>
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
+            {steps.map((step, i) => (
+              <FadeIn key={i} delay={i * 200}>
+                <div className="relative p-6 sm:p-8 rounded-2xl bg-[#1e293b]/50 border border-white/5 transition-all hover:bg-[#1e293b] hover:border-blue-500/30">
+                  <div className="text-5xl sm:text-6xl font-black text-white/5 absolute top-4 right-4">{step.num}</div>
+                  <h3 className="text-xl font-bold mb-3 sm:mb-4 text-white">{step.title}</h3>
+                  <p className="text-slate-400 leading-relaxed text-sm sm:text-base">{step.text}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+          <FadeIn delay={400}>
+            <div className="relative max-w-4xl mx-auto px-2 mb-12">
+              <div className="relative bg-[#1e293b] border border-blue-500/50 rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-6 shadow-2xl">
+                 <div className="flex items-center gap-4">
+                   <div className="bg-blue-500/20 p-3 rounded-full text-blue-400">
+                      <TrendingUp size={32} />
+                   </div>
+                   <p className="text-lg sm:text-2xl text-white font-medium">
+                     Objectif : <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white font-black text-2xl sm:text-3xl">4 à 7% par mois</span> (Mode SAFE)
+                   </p>
+                 </div>
+                 <div className="w-full h-px bg-white/10"></div>
+                 <div className="flex flex-wrap justify-center gap-3">
+                    {eaFeatures.map((feature, i) => (
+                       <div key={i} className="flex items-center gap-2 text-slate-300 bg-black/20 px-4 py-2 rounded-full border border-white/5">
+                          <CheckCircle className="text-emerald-400 w-4 h-4 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm font-semibold">{feature}</span>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* NEW TESTIMONIALS SECTION */}
+      <TestimonialsSection />
+
+      {/* PRICING */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 relative" id="pricing">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <FadeIn>
+            <div className="text-center mb-12 sm:mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Choisissez votre capital</h2>
+              <p className="text-slate-400 text-sm sm:text-base">Peu importe la taille du compte, le prix de notre service reste le même : <span className="text-blue-400 font-bold">0€</span>.</p>
+              
+              {/* MyFxBook Block */}
+              <div className="mt-8 flex flex-col items-center justify-center gap-4">
+                <a 
+                  href="#" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-[#1e293b] hover:bg-[#253248] border border-white/10 p-4 rounded-2xl flex flex-col items-center gap-3 transition-all group max-w-sm w-full"
+                >
+                   {/* Placeholder for MyFxBook Screenshot with real IMG tag */}
+                   <div className="w-full h-32 bg-slate-800 rounded-lg flex items-center justify-center border border-white/5 relative overflow-hidden">
+                      <img 
+                        src="/myfxbook-proof.jpg" 
+                        alt="Courbe MyFxBook" 
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" 
+                        onError={(e) => {e.target.style.display='none'; e.target.nextSibling.style.display='block'}}
+                      />
+                      <span className="relative z-10 text-xs text-slate-400 font-mono">Voir la courbe</span>
+                   </div>
+                   
+                   <div className="flex items-center gap-3 w-full justify-center">
+                     <span className="font-bold text-white tracking-tight text-lg">my<span className="text-[#F98006]">fx</span>book</span>
+                     <div className="h-4 w-[1px] bg-white/20"></div>
+                     <span className="text-sm text-emerald-400 flex items-center gap-1 font-semibold">
+                       <CheckCircle size={14} /> Vérifié
+                     </span>
+                   </div>
+                   <span className="text-blue-400 text-xs hover:underline flex items-center gap-1">
+                     Voir la performance en direct <ExternalLink size={10}/>
+                   </span>
+                </a>
+              </div>
+            </div>
+          </FadeIn>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
+            {/* Card 1 - Starter */}
+            <FadeIn delay={200}>
+              <div className="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col hover:shadow-2xl hover:shadow-blue-900/20 transition-all backdrop-blur-sm hover:-translate-y-1">
+                <div className="mb-4 text-slate-400 font-semibold uppercase text-xs sm:text-sm tracking-wider">Starter</div>
+                <h3 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Compte 50K</h3>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-3xl sm:text-4xl font-bold text-blue-400">0€</span>
+                  <span className="text-slate-500 line-through text-sm">250€</span>
+                </div>
+                <div className="h-px w-full bg-white/10 mb-6"></div>
+                <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 60% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(40% performance)</span></li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès Algo Gestion</li>
+                  <li className="flex gap-3 text-slate-300"><Clock size={20} className="text-blue-500 flex-shrink-0"/> Accès : liste d'attente</li>
+                </ul>
+                <a href={TELEGRAM_LINK} target="_blank" className="w-full py-4 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold hover:bg-blue-600 hover:text-white transition-all active:scale-95 text-center block">Rejoindre la liste</a>
+              </div>
+            </FadeIn>
+
+            {/* Card 2 - Highlighted - EXPERT */}
+            <FadeIn>
+              <div className="bg-[#1e293b] border-2 border-blue-500 rounded-2xl p-6 sm:p-8 flex flex-col relative md:transform md:-translate-y-4 shadow-[0_0_30px_rgba(59,130,246,0.15)] order-first md:order-none z-20">
+                <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">POPULAIRE</div>
+                <div className="mb-4 text-blue-400 font-semibold uppercase text-xs sm:text-sm tracking-wider flex justify-between items-center">
+                  <span>Expert</span>
+                  <span className="text-red-400 text-[10px] flex items-center gap-1 animate-pulse"><Flame size={10}/> 1 place restante</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Compte 200K</h3>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-3xl sm:text-4xl font-bold text-blue-400">0€</span>
+                  <span className="text-slate-500 line-through text-sm">850€</span>
+                </div>
+                <div className="h-px w-full bg-white/10 mb-6"></div>
+                <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Passage Phase 1 & 2</li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>Partage : 80% pour vous</strong> <br/><span className="text-xs text-blue-300/70 ml-8">(20% performance)</span></li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Algo Gestion Expert</li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Support prioritaire</li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Accès immédiat</li>
+                </ul>
+                <a href={TELEGRAM_LINK} target="_blank" className="w-full py-4 rounded-xl bg-white hover:bg-emerald-50 text-slate-900 font-bold transition-all shadow-lg shadow-white/20 active:scale-95 text-center block">Discuter sur Telegram</a>
+              </div>
+            </FadeIn>
+
+            {/* Card 3 - TRADER PRO */}
+            <FadeIn delay={400}>
+              <div className="bg-[#1e293b]/50 border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col hover:shadow-2xl hover:shadow-blue-900/20 transition-all backdrop-blur-sm hover:-translate-y-1">
+                <div className="mb-4 text-slate-400 font-semibold uppercase text-xs sm:text-sm tracking-wider">Trader Pro</div>
+                <h3 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Compte 100k</h3>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-3xl sm:text-4xl font-bold text-blue-400">0€</span>
+                  <span className="text-slate-500 line-through text-sm">450€</span>
+                </div>
+                <div className="h-px w-full bg-white/10 mb-6"></div>
+                <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 70% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(30% performance)</span></li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Algo Gestion Avancé</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Support Prioritaire</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès prioritaire</li>
+                </ul>
+                <a href={TELEGRAM_LINK} target="_blank" className="w-full py-4 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold hover:bg-blue-600 hover:text-white transition-all active:scale-95 text-center block">Vérifier mon éligibilité</a>
+              </div>
+            </FadeIn>
+          </div>
+
+          {/* PAYOUTS CAROUSEL */}
+          <FadeIn>
+            <div className="pt-8 border-t border-white/10 px-4">
+                <div className="flex flex-col sm:flex-row items-center gap-3 mb-8 justify-center text-center">
+                   <DollarSign className="text-emerald-500 w-8 h-8 flex-shrink-0" />
+                   <h3 className="text-2xl md:text-3xl font-bold text-white">Payouts Reçus</h3>
+                </div>
+                
+                <ImageCarousel items={payoutImages} titleColor="text-emerald-500" />
+                
+                <div className="text-center mt-8 sm:mt-12">
+                  <p className="text-slate-500 text-xs sm:text-sm">Nous fêtons chaque victoire avec nos partenaires.</p>
+                </div>
+            </div>
+          </FadeIn>
+
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 sm:py-20 bg-[#0b1120] px-4 border-t border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <FadeIn>
+            <h2 className="text-3xl font-bold mb-8 sm:mb-12 text-center text-white">FAQ</h2>
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="border border-white/10 rounded-lg bg-[#1e293b] overflow-hidden">
+                  <button onClick={() => toggleFaq(i)} className="w-full p-5 sm:p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors active:bg-white/10">
+                    <span className="font-semibold text-base sm:text-lg text-slate-200 pr-4">{faq.q}</span>
+                    {openFaq === i ? <ChevronUp size={20} className="text-blue-500 flex-shrink-0"/> : <ChevronDown size={20} className="text-slate-500 flex-shrink-0"/>}
+                  </button>
+                  {openFaq === i && (
+                    <div className="p-5 sm:p-6 pt-0 text-slate-400 border-t border-white/5 text-sm sm:text-base leading-relaxed">
+                      <p className="mt-4">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-16 sm:py-24 bg-gradient-to-t from-[#0f172a] to-[#0b1120] border-t border-white/5 text-center px-4 sm:px-6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeIn>
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white mb-6 sm:mb-8 tracking-tight">
+              Dernière chance pour intégrer la session
+            </h2>
+            <p className="text-slate-300 text-base sm:text-xl mb-10 sm:mb-12 max-w-2xl mx-auto font-light">
+              Rejoignez les traders qui ont choisi la sécurité et la performance. Passez de l'autre côté du miroir dès aujourd'hui.
+            </p>
+            <div className="flex justify-center w-full">
+              <a href={TELEGRAM_LINK} target="_blank" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white text-lg sm:text-xl font-bold py-5 px-8 sm:px-12 rounded-2xl transition-all shadow-[0_0_40px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3 active:scale-95">
+                Je valide mon Challenge <ArrowRight size={24} className="sm:w-7 sm:h-7"/>
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-10 sm:py-12 border-t border-white/10 bg-[#0f172a] text-slate-500 text-sm">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+          <div>
+            <span className="text-xl font-bold text-white tracking-tighter uppercase">STRATÉGIE <span className="text-blue-500">ESCAPE</span></span>
+            <p className="mt-2 text-xs sm:text-sm">Trading algorithmique à la performance.</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm">
+            <button onClick={() => openModal('cgv')} className="hover:text-blue-400 transition-colors">CGV</button>
+            <button onClick={() => openModal('legal')} className="hover:text-blue-400 transition-colors">Mentions Légales</button>
+            <a href="mailto:strategie.escape.contact@gmail.com" className="hover:text-blue-400 transition-colors">Contact</a>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 mt-8 text-[10px] sm:text-xs text-slate-600 text-center leading-relaxed">
+          DISCLAIMER: Le trading comporte des risques importants de perte en capital. Stratégie Escape fournit des outils logiciels et n'est pas un conseiller financier. Les résultats passés ne préjugent pas des résultats futurs.
+        </div>
+      </footer>
+
+    </div>
+  );
+};
+
+export default App;

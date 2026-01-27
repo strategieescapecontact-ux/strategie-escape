@@ -123,7 +123,7 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
                  <AlertTriangle className="text-red-400 mb-2" />
                  <p className="text-white text-xs font-bold">Image introuvable</p>
                  <p className="text-slate-400 text-[10px] break-all mt-1">Nom attendu : {item.filename}</p>
-                 <p className="text-slate-500 text-[9px] mt-2">Vérifiez le dossier public/</p>
+                 <p className="text-slate-500 text-[9px] mt-2">Dossier public/</p>
               </div>
               
               <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
@@ -182,13 +182,13 @@ const TelegramButton = () => {
 const TestimonialsSection = () => {
   const reviews = [
     { name: "Thomas L.", firm: "Validé chez FTMO", text: "Franchement top. J'étais sceptique au début avec le 0€, mais le compte 50k a été validé en 15 jours. Le partage est fair vu que j'ai rien payé.", stars: 5 },
-    { name: "Karim B.", firm: "Validé chez WeFund", text: "Validé du premier coup. L'équipe est réactive sur Telegram. J'attends mon premier payout là, hate de voir la suite.", stars: 5 },
-    { name: "Aurélien D.", firm: "Validé chez WeFund", text: "J'ai déjà cramé 3 challenges avant eux. Là c'est passé crème. Merci pour le suivi, ça change des vendeurs de rêve.", stars: 4 },
+    { name: "Karim B.", firm: "Validé chez Nova", text: "Validé du premier coup. L'équipe est réactive sur Telegram. J'attends mon premier payout là, hate de voir la suite.", stars: 5 },
+    { name: "Aurélien D.", firm: "Validé chez Kortana", text: "J'ai déjà cramé 3 challenges avant eux. Là c'est passé crème. Merci pour le suivi, ça change des vendeurs de rêve.", stars: 4 },
     { name: "Marc P.", firm: "Validé chez FTMO", text: "Bonne expérience. Le robot est safe, pas de frayeur sur le drawdown. C'est exactement ce que je cherchais pour diversifier.", stars: 5 },
-    { name: "Sophie M.", firm: "Validé chez Paid2Trade", text: "Un peu long pour avoir une réponse le week-end mais le résultat est là : compte 100k financé. C'est le principal au final.", stars: 4 },
-    { name: "David R.", firm: "Validé chez WeFund", text: "J'ai pris le pack expert. L'accès immédiat c'est pas du blabla. L'algo tourne bien pour l'instant, c'est propre.", stars: 5 },
-    { name: "Lucas V.", firm: "Validé chez WeFund", text: "Simple et efficace. Pas de prise de tête avec les graphiques. Je laisse tourner et je récupère ma part.", stars: 5 },
-    { name: "Julien S.", firm: "Validé chez SLV", text: "Service carré. Rien à dire. Validé en 3 semaines environ.", stars: 5 }
+    { name: "Sophie M.", firm: "Validé chez NextStep", text: "Un peu long pour avoir une réponse le week-end mais le résultat est là : compte 100k financé. C'est le principal au final.", stars: 4 },
+    { name: "David R.", firm: "Validé chez Infinity", text: "J'ai pris le pack expert. L'accès immédiat c'est pas du blabla. L'algo tourne bien pour l'instant, c'est propre.", stars: 5 },
+    { name: "Lucas V.", firm: "Validé chez FTMO", text: "Simple et efficace. Pas de prise de tête avec les graphiques. Je laisse tourner et je récupère ma part.", stars: 5 },
+    { name: "Julien S.", firm: "Validé chez Nova", text: "Service carré. Rien à dire. Validé en 3 semaines environ.", stars: 5 }
   ];
 
   return (
@@ -291,18 +291,17 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
-  // --- NOMS DE FICHIERS SIMPLIFIÉS ---
-  // Veillez à ce que vos fichiers dans public/ aient EXACTEMENT ces noms (tout en minuscules)
+  // --- NOUVEAUX NOMS SIMPLIFIÉS (AVEC EXTENSION .JPG PAR DÉFAUT) ---
   const validationImages = [
-    { filename: "val1.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
-    { filename: "val2.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
-    { filename: "val3.jpg", title: "Validation 200k", subtitle: "Performance pure" }, 
+    { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
+    { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
+    { filename: "val03.jpg", title: "Validation 200k", subtitle: "Performance pure" }, 
   ];
 
   const payoutImages = [
-    { filename: "pay1.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
-    { filename: "pay2.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
-    { filename: "pay3.jpg", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
+    { filename: "pay01.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
+    { filename: "pay02.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
+    { filename: "pay03.jpg", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
   ];
 
   const faqs = [

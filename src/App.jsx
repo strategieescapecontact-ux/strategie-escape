@@ -86,6 +86,48 @@ const Modal = ({ isOpen, onClose, title, content }) => {
   );
 };
 
+// --- SMART IMAGE : GESTION AUTOMATIQUE DES EXTENSIONS ---
+const SmartImage = ({ item, titleColor }) => {
+  const [imgSrc, setImgSrc] = useState(`/${item.filename}.jpg`);
+  const [errorCount, setErrorCount] = useState(0);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    const nextStep = errorCount + 1;
+    setErrorCount(nextStep);
+
+    // Tente différentes extensions si la première échoue
+    if (nextStep === 1) setImgSrc(`/${item.filename}.png`); // Essaie PNG
+    else if (nextStep === 2) setImgSrc(`/${item.filename}.jpeg`); // Essaie JPEG
+    else if (nextStep === 3) setImgSrc(`/${item.filename}`); // Essaie sans extension (si déjà incluse)
+    else setHasError(true); // Abandonne
+  };
+
+  return (
+    <div className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
+      {!hasError ? (
+        <img 
+          src={imgSrc} 
+          alt={item.title} 
+          className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+          onError={handleError}
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
+           <AlertTriangle className="text-red-400 mb-2" />
+           <p className="text-white text-xs font-bold">Image introuvable</p>
+           <p className="text-slate-400 text-[10px] break-all mt-1">{item.filename}</p>
+        </div>
+      )}
+      
+      <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
+        <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
+        <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
+      </div>
+    </div>
+  );
+};
+
 const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -107,32 +149,7 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {items.map((item, index) => (
-            <div key={index} className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
-              
-              {/* IMAGE SEULE AVEC GESTION D'ERREUR */}
-              <img 
-                src={`/${item.filename}`} 
-                alt={item.title} 
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none'; 
-                  e.target.nextSibling.style.display = 'flex';
-                }} 
-              />
-              
-              {/* Message d'erreur discret si image HS */}
-              <div className="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
-                 <AlertTriangle className="text-red-400 mb-2" />
-                 <p className="text-white text-xs font-bold">Image manquante</p>
-                 <p className="text-slate-400 text-[10px] break-all mt-1">({item.filename})</p>
-                 <p className="text-slate-500 text-[9px] mt-2">Dossier public/</p>
-              </div>
-              
-              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
-                <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
-                <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
-              </div>
-            </div>
+            <SmartImage key={index} item={item} titleColor={titleColor} />
           ))}
         </div>
       </div>
@@ -293,17 +310,17 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
-  // --- NOMS DE FICHIERS SIMPLIFIÉS 01/02/03 ---
+  // --- NOMS DE FICHIERS SIMPLIFIÉS (SANS EXTENSION DANS LE CODE) ---
   const validationImages = [
-    { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
-    { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
-    { filename: "val03.jpg", title: "Validation 200k", subtitle: "Performance pure" }, 
+    { filename: "val01", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
+    { filename: "val02", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
+    { filename: "val03", title: "Validation 200k", subtitle: "Performance pure" }, 
   ];
 
   const payoutImages = [
-    { filename: "pay01.jpg", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
-    { filename: "pay02.jpg", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
-    { filename: "pay03.jpg", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
+    { filename: "pay01", title: "Virement Reçu", subtitle: "Client satisfait - Partage 80/20" },
+    { filename: "pay02", title: "Retrait Crypto", subtitle: "Paiement rapide et sécurisé" },
+    { filename: "pay03", title: "Virement Bancaire", subtitle: "Gains mois 1" }, 
   ];
 
   const faqs = [
@@ -557,13 +574,10 @@ const App = () => {
                 >
                    {/* Placeholder for MyFxBook Screenshot with real IMG tag */}
                    <div className="w-full h-32 bg-slate-800 rounded-lg flex items-center justify-center border border-white/5 relative overflow-hidden">
-                      <img 
-                        src="/myfxbook.jpg" 
-                        alt="Courbe MyFxBook" 
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" 
-                        onError={(e) => {e.target.style.display='none'; e.target.nextSibling.style.display='block'}}
+                      <SmartImage 
+                        item={{filename: "myfxbook", title: "Courbe"}} 
+                        titleColor="text-white"
                       />
-                      <span className="relative z-10 text-xs text-slate-400 font-mono">Voir la courbe</span>
                    </div>
                    
                    <div className="flex items-center gap-3 w-full justify-center">
@@ -657,6 +671,7 @@ const App = () => {
                    <h3 className="text-2xl md:text-3xl font-bold text-white">Payouts Reçus</h3>
                 </div>
                 
+                {/* Images de Payouts */}
                 <ImageCarousel items={payoutImages} titleColor="text-emerald-500" />
                 
                 <div className="text-center mt-8 sm:mt-12">

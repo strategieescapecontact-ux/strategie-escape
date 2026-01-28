@@ -86,6 +86,36 @@ const Modal = ({ isOpen, onClose, title, content }) => {
   );
 };
 
+// --- SMART IMAGE : Utilise le nom EXACT fourni ---
+const SmartImage = ({ item, titleColor }) => {
+  const [imgSrc, setImgSrc] = useState(`/${item.filename}`);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
+      {!hasError ? (
+        <img 
+          src={imgSrc} 
+          alt={item.title} 
+          className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
+           <AlertTriangle className="text-red-400 mb-2" />
+           <p className="text-white text-xs font-bold">Image introuvable</p>
+           <p className="text-slate-400 text-[10px] break-all mt-1">{item.filename}</p>
+        </div>
+      )}
+      
+      <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
+        <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
+        <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
+      </div>
+    </div>
+  );
+};
+
 const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -107,31 +137,7 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {items.map((item, index) => (
-            <div key={index} className="min-w-full h-full relative flex items-center justify-center bg-slate-900">
-              
-              {/* IMAGE SEULE AVEC FALLBACK ET SUPPORT SANS EXTENSION */}
-              <img 
-                src={`/${item.filename}`} 
-                alt={item.title} 
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none'; 
-                  e.target.nextSibling.style.display = 'flex';
-                }} 
-              />
-              
-              {/* Message d'erreur discret si image HS */}
-              <div className="hidden absolute inset-0 flex-col items-center justify-center text-center p-4 z-0 bg-slate-800">
-                 <AlertTriangle className="text-red-400 mb-2" />
-                 <p className="text-white text-xs font-bold">Image manquante</p>
-                 <p className="text-slate-500 text-[9px] mt-2">({item.filename})</p>
-              </div>
-              
-              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/95 to-transparent pt-24 z-20 pointer-events-none">
-                <p className={`${titleColor} font-bold text-lg mb-1 leading-tight`}>{item.title}</p>
-                <p className="text-slate-300 text-xs leading-snug">{item.subtitle}</p>
-              </div>
-            </div>
+            <SmartImage key={index} item={item} titleColor={titleColor} />
           ))}
         </div>
       </div>
@@ -158,8 +164,8 @@ const ImageCarousel = ({ items, titleColor = "text-emerald-400" }) => {
   );
 };
 
-// LIEN TELEGRAM A REMPLACER
-const TELEGRAM_LINK = "https://t.me/VOTRE_LIEN_TELEGRAM"; 
+// LIEN TELEGRAM CORRIGÉ ICI
+const TELEGRAM_LINK = "https://t.me/escapestrategie"; 
 
 const TelegramButton = () => {
   return (
@@ -183,11 +189,11 @@ const TelegramButton = () => {
 const TestimonialsSection = () => {
   const reviews = [
     { name: "Thomas L.", firm: "Validé chez FTMO", text: "Franchement top. J'étais sceptique au début avec le 0€, mais le compte 50k a été validé en 15 jours. Le partage est fair vu que j'ai rien payé.", stars: 5 },
-    { name: "Karim B.", firm: "Validé chez Nova", text: "Validé du premier coup. L'équipe est réactive sur Telegram. J'attends mon premier payout là, hate de voir la suite.", stars: 5 },
-    { name: "Aurélien D.", firm: "Validé chez Kortana", text: "J'ai déjà cramé 3 challenges avant eux. Là c'est passé crème. Merci pour le suivi, ça change des vendeurs de rêve.", stars: 4 },
+    { name: "Karim B.", firm: "Validé chez WeFund", text: "Validé du premier coup. L'équipe est réactive sur Telegram. J'attends mon premier payout là, hate de voir la suite.", stars: 5 },
+    { name: "Aurélien D.", firm: "Validé chez WeFund", text: "J'ai déjà cramé 3 challenges avant eux. Là c'est passé crème. Merci pour le suivi, ça change des vendeurs de rêve.", stars: 4 },
     { name: "Marc P.", firm: "Validé chez FTMO", text: "Bonne expérience. Le robot est safe, pas de frayeur sur le drawdown. C'est exactement ce que je cherchais pour diversifier.", stars: 5 },
     { name: "Sophie M.", firm: "Validé chez NextStep", text: "Un peu long pour avoir une réponse le week-end mais le résultat est là : compte 100k financé. C'est le principal au final.", stars: 4 },
-    { name: "David R.", firm: "Validé chez Infinity", text: "J'ai pris le pack expert. L'accès immédiat c'est pas du blabla. L'algo tourne bien pour l'instant, c'est propre.", stars: 5 },
+    { name: "David R.", firm: "Validé chez Foxx Funded", text: "J'ai pris le pack expert. L'accès immédiat c'est pas du blabla. L'algo tourne bien pour l'instant, c'est propre.", stars: 5 },
     { name: "Lucas V.", firm: "Validé chez FTMO", text: "Simple et efficace. Pas de prise de tête avec les graphiques. Je laisse tourner et je récupère ma part.", stars: 5 },
     { name: "Julien S.", firm: "Validé chez Nova", text: "Service carré. Rien à dire. Validé en 3 semaines environ.", stars: 5 }
   ];
@@ -292,7 +298,7 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
-  // --- NOMS DE FICHIERS AVEC EXTENSION .JPG ---
+  // --- NOMS DE FICHIERS SIMPLIFIÉS (SANS EXTENSION DANS LE CODE) ---
   const validationImages = [
     { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
     { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
@@ -398,14 +404,6 @@ const App = () => {
             </div>
           </FadeIn>
           
-          <div className="mt-12 sm:mt-16 border-t border-white/5 pt-8">
-            <p className="text-xs sm:text-sm text-slate-400 mb-4 font-semibold tracking-widest uppercase">Nos algorithmes fonctionnent sur</p>
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 opacity-70">
-              {["FTMO", "Nova Funding", "Kortana", "Next Step", "Infinity"].map((firm) => (
-                <span key={firm} className="text-lg sm:text-xl font-bold tracking-tight whitespace-nowrap text-slate-400 hover:text-white transition-colors cursor-default">{firm}</span>
-              ))}
-            </div>
-          </div>
         </div>
       </header>
 
@@ -546,7 +544,7 @@ const App = () => {
               <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Choisissez votre capital</h2>
               <p className="text-slate-400 text-sm sm:text-base">Peu importe la taille du compte, le prix de notre service reste le même : <span className="text-blue-400 font-bold">0€</span>.</p>
               
-              {/* MyFxBook Block with Image Placeholder */}
+              {/* MyFxBook Block */}
               <div className="mt-8 flex flex-col items-center justify-center gap-4">
                 <a 
                   href="https://www.myfxbook.com/members/ATCSoftware/hrc-algo/11801141" 
@@ -556,13 +554,10 @@ const App = () => {
                 >
                    {/* Placeholder for MyFxBook Screenshot with real IMG tag */}
                    <div className="w-full h-32 bg-slate-800 rounded-lg flex items-center justify-center border border-white/5 relative overflow-hidden">
-                      <img 
-                        src="/myfxbook.jpg" 
-                        alt="Courbe MyFxBook" 
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" 
-                        onError={(e) => {e.target.style.display='none'; e.target.nextSibling.style.display='block'}}
+                      <SmartImage 
+                        item={{filename: "gggggggg.png", title: "Courbe"}} 
+                        titleColor="text-white"
                       />
-                      <span className="relative z-10 text-xs text-slate-400 font-mono">Voir la courbe</span>
                    </div>
                    
                    <div className="flex items-center gap-3 w-full justify-center">
@@ -593,7 +588,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 40%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 60% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(40% performance)</span></li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès Algo Gestion</li>
                   <li className="flex gap-3 text-slate-300"><Clock size={20} className="text-blue-500 flex-shrink-0"/> Accès : liste d'attente</li>
                 </ul>
@@ -617,7 +612,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>FRAIS 20%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> <strong>Partage : 80% pour vous</strong> <br/><span className="text-xs text-blue-300/70 ml-8">(20% performance)</span></li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Algo Gestion Expert</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Support prioritaire</li>
                   <li className="flex gap-3 text-white"><CheckCircle size={20} className="text-blue-400 flex-shrink-0"/> Accès immédiat</li>
@@ -638,7 +633,7 @@ const App = () => {
                 <div className="h-px w-full bg-white/10 mb-6"></div>
                 <ul className="space-y-4 mb-8 flex-1 text-sm sm:text-base">
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Passage Phase 1 & 2</li>
-                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>FRAIS 30%</strong> sur les profits</li>
+                  <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> <strong>Partage : 70% pour vous</strong> <br/><span className="text-xs text-slate-500 ml-8">(30% performance)</span></li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Algo Gestion Avancé</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Support Prioritaire</li>
                   <li className="flex gap-3 text-slate-300"><CheckCircle size={20} className="text-blue-500 flex-shrink-0"/> Accès prioritaire</li>

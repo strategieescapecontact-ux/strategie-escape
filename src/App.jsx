@@ -298,7 +298,7 @@ const App = () => {
     "Filtre News Économiques"
   ];
 
-  // --- NOMS DE FICHIERS SIMPLIFIÉS (SANS EXTENSION DANS LE CODE) ---
+  // --- NOMS DE FICHIERS SIMPLIFIÉS ---
   const validationImages = [
     { filename: "val01.jpg", title: "Validation 100k", subtitle: "Phase 1 & 2 complétées" },
     { filename: "val02.jpg", title: "Validation 50k", subtitle: "Respect strict du drawdown" },
@@ -404,6 +404,14 @@ const App = () => {
             </div>
           </FadeIn>
           
+          <div className="mt-12 sm:mt-16 border-t border-white/5 pt-8">
+            <p className="text-xs sm:text-sm text-slate-400 mb-4 font-semibold tracking-widest uppercase">Nos algorithmes fonctionnent sur</p>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 opacity-70">
+              {["FTMO", "Nova Funding", "Kortana", "Next Step", "Infinity"].map((firm) => (
+                <span key={firm} className="text-lg sm:text-xl font-bold tracking-tight whitespace-nowrap text-slate-400 hover:text-white transition-colors cursor-default">{firm}</span>
+              ))}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -555,7 +563,7 @@ const App = () => {
                    {/* Placeholder for MyFxBook Screenshot with real IMG tag */}
                    <div className="w-full h-32 bg-slate-800 rounded-lg flex items-center justify-center border border-white/5 relative overflow-hidden">
                       <SmartImage 
-                        item={{filename: "gggggggg.png", title: "Courbe"}} 
+                        item={{filename: "myfxbook.jpg", title: "Courbe"}} 
                         titleColor="text-white"
                       />
                    </div>
